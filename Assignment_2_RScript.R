@@ -54,14 +54,20 @@ summary(as.factor(mapped_df$Symbol), maxsum = 100)
 
 library(tidyverse)
 
-my_data<-apply(expression_df[2:70],2,log)
+my_data<-apply(expression_df[,2:70],1,log)
 plot(my_data)
-  
-# my_data <- expression_df
-# my_data %>% select(2:70)
-# maxVals<-apply(my_data,2,max)
-# 
-# plot(maxVals)
+
+#maxVals<-apply(expression_df[,2:70],1,max)
+
+maxVals<-apply(my_data[,2:70],1,max)
+plot(maxVals)
+
+minVals<-apply(my_data[,2:70],1,min)
+plot(minVals) 
+
+ranges <- maxVals - minVals
+d <- density(ranges) # returns the density data
+plot(d) # plots the result
 
 # data %>% ggplot(aes(x=Gene)) + geom_density()
 
@@ -71,14 +77,6 @@ plot(my_data)
 #   ggplot(aes(x=Gene, y = SRR)) +
 #   geom_point()
 
-
-
-# plot(head(expression_df$SRR12705190, 57736))
-# plot(head(log(expression_df$SRR12705190), 57736), head(log(expression_df$SRR12705235), 57736))
-# plot(head(log(expression_df$SRR12705190), 57736), head(log(expression_df$SRR12705235), 57736))
-
-
-#plot(expression_df$Gene, expression_df)
 
 #Initialize x and y
 #x <- 1:69
