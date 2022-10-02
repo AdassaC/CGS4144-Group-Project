@@ -10,11 +10,11 @@ library(org.Hs.eg.db)
 # We will need this so we can use the pipe: %>%
 library(magrittr)
 
-metaData <- readr::read_csv("CGS4144 Project/Data/metadata_file.csv")
-expression_df <- readr::read_csv("CGS4144 Project/Data/dataset_file.csv") %>%
-
-# Tuck away the Gene ID column as row names
-tibble::column_to_rownames("Gene")
+metaData <- readr::read_csv("data/metadata_file.csv")
+expression_df <- readr::read_csv("data/dataset_file.csv") %>%
+  
+  # Tuck away the Gene ID column as row names
+  tibble::column_to_rownames("Gene")
 
 # Make the data in the order of the metadata
 expression_df <- expression_df %>%
@@ -27,43 +27,49 @@ all.equal(colnames(expression_df), metaData$Run)
 expression_df <- expression_df %>%
   tibble::rownames_to_column("Gene")
 
-# Map Ensembl IDs to their associated Entrez IDs
+# Map Ensembl IDs to their associated HUGO SYMBOL IDs
 mapped_list <- mapIds(
   org.Hs.eg.db, # Replace with annotation package for your organism
   keys = expression_df$Gene,
   keytype = "ENSEMBL", # Replace with the type of gene identifiers in your data
-  column = "ENTREZID", # The type of gene identifiers you would like to map to
+  column = "SYMBOL", # The type of gene identifiers you would like to map to
   multiVals = "list"
 )
-## 'select()' returned 1:many mapping between keys and columns
 
 head(mapped_list)
 
 # Let's make our list a bit more manageable by turning it into a data frame
 mapped_df <- mapped_list %>%
-  tibble::enframe(name = "Ensembl", value = "Entrez") %>%
+  tibble::enframe(name = "Ensembl", value = "Symbol") %>%
   # enframe() makes a `list` column; we will simplify it with unnest()
   # This will result in one row of our data frame per list item
-  tidyr::unnest(cols = Entrez)
+  tidyr::unnest(cols = Symbol)
 
 head(mapped_df)
 
-# Use the `summary()` function to show the distribution of Entrez values
+# Use the `summary()` function to show the distribution of HUGO SYMBOL values
 # We need to use `as.factor()` here to get the count of unique values
 # `maxsum = 10` limits the summary to 10 distinct values
-summary(as.factor(mapped_df$Entrez), maxsum = 10)
+summary(as.factor(mapped_df$Symbol), maxsum = 100)
 
 library(tidyverse)
 
-expression_df %>%
-  pivot_longer(cols=2:70, names_to="cancer_type", values_to="gene_expr") %>%
-  #filter(ID == "ABCA8") %>%
-  ggplot(aes(x=cancer_type, y=gene_expr)) +
-  geom_point()
+my_data<-apply(expression_df[2:70],2,log)
+plot(my_data)
+  
+# my_data <- expression_df
+# my_data %>% select(2:70)
+# maxVals<-apply(my_data,2,max)
+# 
+# plot(maxVals)
 
+# data %>% ggplot(aes(x=Gene)) + geom_density()
 
-
-
+# expression_df %>%
+#   pivot_longer(cols=2:70) %>%
+#   #filter(ID == "ABCA8") %>%
+#   ggplot(aes(x=Gene, y = SRR)) +
+#   geom_point()
 
 
 
@@ -83,4 +89,3 @@ expression_df %>%
 
 #Log scale
 #plot(x, y, log="y")
-
