@@ -131,19 +131,18 @@ summary(as.factor(mapped_df$Symbol), maxsum = 100)
 
 #------------------------------------------- DENSITY PLOT ---------------------------------------#
 
-log_scaled<-apply(expression_df[,2:70],1,log) 
+log_scaled <- log(expression_df[,2:70]) 
 
-maxVals<-apply(log_scaled[,2:70],1,max)
+maxVals<-apply(log_scaled, 2 ,max)
 plot(maxVals)
 
-minVals<-apply(log_scaled[,2:70],1,min)
+minVals<-apply(log_scaled, 2,min)
 plot(minVals) 
 
 #count matrix geneXsample
 ranges <- maxVals - minVals
 d <- density(ranges) # returns the density data
 plot(d) # plots the result
-
 
 #------------------------------------- PERFORM DESeq2 ANALYSIS ------------------------------------------#
 head(metaData$Group)
@@ -172,12 +171,13 @@ metaData <- metaData %>%
 
 levels(metaData$cancer_status)
 
-
 filtered_expression_df <- (expression_df[,2:70]) %>%
   dplyr::filter(rowSums(.) >= 115)
 
 # round all expression counts
 gene_matrix <- round(expression_df[,2:70])
+
+head(gene_matrix)
 
 ddset <- DESeqDataSetFromMatrix(
   # Here we supply normalized count data
@@ -185,14 +185,21 @@ ddset <- DESeqDataSetFromMatrix(
   # Supply the `colData` with our metadata data frame
   colData = metaData,
   # Supply our experimental variable to `design`
-  design = ~1
+  design = ~cancer_status
 )
 
 #Generate DESeq object and DESeq2 analysis results
 deseq_object <- DESeq(ddset)
 deseq_results <- results(deseq_object)
 
+#Display DeSEQ2 results
 head(deseq_results)
+
+deseq_results <- lfcShrink(
+    deseq_object, # The original DESeq2 object after running DESeq()
+    coef = 3, # The log fold change coefficient used in DESeq(); the default is 2.
+    res = deseq_results # The original DESeq2 results table
+  )
 
 # Create dataframe for DESeqResults 
 deseq_df <- deseq_results %>%
@@ -205,6 +212,9 @@ deseq_df <- deseq_results %>%
   # sort by statistic -- the highest values will be genes with
   # higher expression in RPL10 mutated samples
   dplyr::arrange(dplyr::desc(log2FoldChange))
+
+#Display DeSEQ2 results
+head(deseq_results)
 
 #-------------------------------------------- PCA PLOT ------------------------------------------#
 dds_norm <- vst(ddset)
@@ -270,7 +280,6 @@ geneList = deseq_df$log2FoldChange
 names(geneList) = deseq_df$Gene
 geneList = sort(geneList, decreasing = TRUE)
 
-
 #Display geneList
 head(geneList)
 
@@ -316,44 +325,3 @@ CP_enrichPlot3 <- gseaplot(
   #color.line = "#0d76ff"
 )
 CP_enrichPlot3
-
-# #Save plot using `ggsave()` function
-# ggsave(
-#   file.path(
-#     plots_dir,
-#     "OC_umap_plot.png" # Replace with a good file name for your plot
-#   ),
-#   plot = ego3
-# )
-
-# deseq_object <- DESeq(ddset)
-# 
-# deseq_results <- results(deseq_object)
-# 
-# head(deseq_results)
-# 
-# deseq_results <- lfcShrink(
-#   deseq_object, # The original DESeq2 object after running DESeq()
-#   coef = 3, # The log fold change coefficient used in DESeq(); the default is 2.
-#   res = deseq_results # The original DESeq2 results table
-# )
-# 
-# head(deseq_results)
-# 
-# # this is of class DESeqResults -- we want a data frame
-# deseq_df <- deseq_results %>%
-#   # make into data.frame
-#   as.data.frame() %>%
-#   # the gene names are row names -- let's make them a column for easy display
-#   tibble::rownames_to_column("Gene") %>%
-#   # add a column for significance threshold results
-#   dplyr::mutate(threshold = pvalue < 0.05) %>%
-#   # sort by statistic -- the highest values will be genes with
-#   # higher expression in RPL10 mutated samples
-#   dplyr::arrange(dplyr::desc(log2FoldChange))
-# 
-# head(deseq_df)
-# 
-# pcaPlot<-plotCounts(ddset, gene = "ENSG00000000003", intgroup = "cancer_status")
-# 
-# pcaPlot()
