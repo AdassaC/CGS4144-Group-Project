@@ -23,10 +23,23 @@ if (!("apeglm" %in% installed.packages())) {
   # Install this package if it isn't installed yet
   BiocManager::install("apeglm", update = FALSE)
 }
+if (!("clusterProfiler" %in% installed.packages())) {
+  # Install this package if it isn't installed yet
+  BiocManager::install("clusterProfiler", update = FALSE)
+}
+if (!("umap" %in% installed.packages())) {
+  # Install umap package
+  BiocManager::install("umap", update = FALSE)
+}
+if (!("msigdbr" %in% installed.packages())) {
+  # Install this package if it isn't installed yet
+  BiocManager::install("msigdbr", update = FALSE)
+}
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
+BiocManager::install("enrichplot")
 # The following initializes usage of Bioc devel
 #BiocManager::install(version='devel')
 
@@ -56,6 +69,11 @@ library(M3C)
 library(Rtsne)
 
 library(gprofiler2)
+
+library(enrichplot)
+library(clusterProfiler)
+library(msigdbr)
+
 
 
 
@@ -322,7 +340,7 @@ volcano_plot <- EnhancedVolcano::EnhancedVolcano(
   pCutoff = 0.01 # Loosen the cutoff since we supplied corrected p-values
 )
 
-volcano_plot
+
 
 #-----gprofiler2----#
 gene_names<-mapped_df[,2]
@@ -337,7 +355,51 @@ gostres <- gost(query = c(gene_names),
 
 # The result is a named list where “result” is a data.frame with the enrichment analysis results
 # and “meta” containing a named list with all the metadata for the query.
+
+names(gostres)
+
+head(gostres$result, 3)
+names(gostres$meta)
+
+gostres2 <- gost(query = c("X:1000:1000000", "rs17396340", "GO:0005005", "ENSG00000156103", "NLRP1"), 
+                 organism = "hsapiens", ordered_query = FALSE, 
+                 multi_query = FALSE, significant = TRUE, exclude_iea = TRUE, 
+                 measure_underrepresentation = FALSE, evcodes = TRUE, 
+                 user_threshold = 0.05, correction_method = "g_SCS", 
+                 domain_scope = "annotated", custom_bg = NULL, 
+                 numeric_ns = "", sources = NULL)
+
+head(gostres2$result, 3)
+gostres_link <- gost(query = c("X:1000:1000000", "rs17396340", "GO:0005005", "ENSG00000156103", "NLRP1"), 
+                     as_short_link = TRUE)
+
+multi_gostres1 <- gost(query = list("chromX" = c("X:1000:1000000", "rs17396340", 
+                                                 "GO:0005005", "ENSG00000156103", "NLRP1"),
+                                    "chromY" = c("Y:1:10000000", "rs17396340", 
+                                                 "GO:0005005", "ENSG00000156103", "NLRP1")), 
+                       multi_query = FALSE)
+
+
+
+head(multi_gostres1$result, 3)
+
+multi_gostres2 <- gost(query = list("chromX" = c("X:1000:1000000", "rs17396340",
+                                                 "GO:0005005", "ENSG00000156103", "NLRP1"),
+                                    "chromY" = c("Y:1:10000000", "rs17396340", 
+                                                 "GO:0005005", "ENSG00000156103", "NLRP1")), 
+                       multi_query = TRUE)
+
+
+head(multi_gostres2$result, 3)
+
+gostplot(gostres, capped = TRUE, interactive = TRUE)
+
+
+
+
 head(gostres$result)
 
 p <- gostplot(gostres, capped = FALSE, interactive = FALSE)
 p
+
+
