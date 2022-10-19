@@ -4,10 +4,15 @@ if (!("org.Hs.eg.db" %in% installed.packages())) {
   # Install this package if it isn't installed yet
   BiocManager::install("org.Hs.eg.db", update = FALSE)
 }
-## row wise variance using rowVars()
 
+## Install matrixStats package
 
+#if(!("matrixStats" %in% installed.packages())){
+#  install.packages("matrixStats", update = FALSE)
+  
+#}
 install.packages("matrixStats")
+
 library(matrixStats)
 
 
@@ -73,7 +78,6 @@ copy_expression_df$row_var = rowVars(as.matrix(expression_df[,c(2:70)]))
 row_var
 
 copy_expression_df <- copy_expression_df[order(-row_var),]
-
-#genes = expression_df$Gene
+copy_expression_df <- copy_expression_df[c(1:50001),] #first 50001 rows 1 for the samples, 50000 for the rows
 
 
