@@ -78,6 +78,6 @@ copy_expression_df$row_var = rowVars(as.matrix(expression_df[,c(2:70)]))
 row_var
 
 copy_expression_df <- copy_expression_df[order(-row_var),]
-copy_expression_df <- copy_expression_df[c(1:50001),] #first 50001 rows 1 for the samples, 50000 for the rows
+copy_expression_df <- copy_expression_df[c(1:5001),] #first 5001 rows 1 for the samples, 5000 for the rows
 
 
