@@ -94,12 +94,12 @@ kmData <- kmData[,1:69]
 #transpose matrix
 kmData <-t(kmData)
 
-#50 clusters for kmeans 
-km = kmeans(kmData, 5)
+#3 clusters for kmeans 
+km = kmeans(kmData, 3)
 
 #show kmeans heatmap
 #add dendograms
-fviz_cluster(km, data=kmData, main ="5000 genes with 5 clusters")
+fviz_cluster(km, data=kmData, main ="5000 genes with 3 clusters")
 
 #-------KMeans 10 genes-------#
 
@@ -120,9 +120,9 @@ kmData10 <- kmData10[,1:69]#remove row variance
 #transpose matrix
 kmData10<-t(kmData10)
 
-km10 = kmeans(kmData10, 5)
+km10 = kmeans(kmData10, 3)
 
-fviz_cluster(km10, data=kmData10, main = "10 genes with 5 clusters")
+fviz_cluster(km10, data=kmData10, main = "10 genes with 3 clusters")
              
 
 #-------KMeans 100 genes ------#
@@ -139,9 +139,9 @@ kmData100 <- kmData100[,1:69]#remove row variance
 
 kmData100 <- t(kmData100) #transpose matrix
 
-km100 = kmeans(kmData100, 5)
+km100 = kmeans(kmData100, 3)
 
-fviz_cluster(km100, data =kmData100,main = "100 genes with 5 clusters")
+fviz_cluster(km100, data =kmData100,main = "100 genes with 3 clusters")
 
 #-------KMeans 1000 genes ------#
 
@@ -157,9 +157,9 @@ kmData1k <- copy_expression_df[,-1]
 kmData1k <- kmData1k[,1:69]#remove row variance
 kmData1k <- t(kmData1k) #transpose matrix
 
-km1k = kmeans(kmData1k, 5)
+km1k = kmeans(kmData1k, 3)
 
-fviz_cluster(km1k, data =kmData1k,main = "1000 genes with 5 clusters")
+fviz_cluster(km1k, data =kmData1k,main = "1000 genes with 3 clusters")
 
 #-------KMeans 10000 genes ------#
 
@@ -174,9 +174,9 @@ kmData10k <- copy_expression_df[,-1]
 kmData10k <- kmData10k[,1:69] # remove row variance
 kmData10k <- t(kmData10k)
 
-km10k = kmeans(kmData10k, 5)
+km10k = kmeans(kmData10k, 3)
 
-fviz_cluster(km10k, data =kmData10k, main = "10000 genes with 5 clusters")
+fviz_cluster(km10k, data =kmData10k, main = "10000 genes with 3 clusters")
 
 #-------Sankey Plot-------#
 #s2 <- km10$cluster
@@ -209,7 +209,7 @@ copy_expression_df <- expression_df
 entire <- copy_expression_df[,-1]
 entire <- t(entire)
 
-kmEntire = kmeans(entire, 5)
+kmEntire = kmeans(entire, 3)
 
 chisq1 <- chisq.test(table(kmEntire$cluster, km$cluster))
 chisq1
@@ -257,6 +257,8 @@ chisq4a$p.value <- adjusted[5]
 chisq5a <- chisq5
 chisq5a$p.value <- adjusted[6]
 
+#tests<-data.frame(reg = c(chisq,chisq1) )
+
 pvalues = data.frame(
   regular = c(chisq$p.value,
       chisq1$p.value,
@@ -273,3 +275,4 @@ pvalues = data.frame(
 )
 
 pairs(pvalues[1:2],pch=21)
+pairs(cdata)
